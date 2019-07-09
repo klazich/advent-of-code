@@ -4,7 +4,10 @@
   "main": "index.js",
   "license": "MIT",
   "dependencies": {
-    "@babel/runtime": "^7.4.5"
+    "@babel/runtime": "^7.4.5",
+    "js-combinatorics": "^0.5.4",
+    "lodash": "^4.17.11",
+    "md5": "^2.2.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.4.4",
@@ -19,7 +22,7 @@
     "prebuild": "yarn run format",
     "start": "babel-node",
     "prestart": "yarn run format",
-    "format": "prettier --write \"src/**/*.{js,jsx,json,css,md}\"",
+    "format": "prettier --write --loglevel=warn \"src/**/*.{js,jsx,json,css,md}\"",
     "format-root": "prettier --write \"./*.{js,jsx,json,css,md}\""
   }
 }

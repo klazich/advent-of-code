@@ -1,0 +1,40 @@
+Using the second example from the puzzle description
+as an input; "X(8x2)(3x3)ABCY", the algorithm would run as follows:
+
+
+multi:    1               1 1 1 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 0
+          ^
+Normal character, so we add its weight to length.
+
+multi:    1               2 2 2 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 1
+            ^^^^^^
+For the next 8 chars multi is multi * 2
+
+multi:    1               6 6 6 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 1
+                   ^^^^^^
+For the next 3 chars multi is multi * 3
+
+multi:    1               6 6 6 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 7
+                          ^
+Normal character, so we add its weight to length.
+
+multi:    1               6 6 6 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 13
+                            ^
+Normal character, so we add its weight to length.
+
+multi:    1               6 6 6 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 19
+                              ^
+Normal character, so we add its weight to length.
+
+multi:    1               6 6 6 1
+Tokens:  [# 5(8 2) 5(3 3) # # # #], length: 20
+                                ^
+Normal character, so we add its weight to length.
+
+Weights: [111111222226661], length:  20
