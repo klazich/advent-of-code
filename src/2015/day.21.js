@@ -4,85 +4,84 @@ const input = readFileSync('./input/2015/day.21.input.txt', 'utf-8')
 
 // 2015
 // Day 21: RPG Simulator 20XX
-//  1.
-//  2.
+//  1. 111
+//  2. 188
 
 const BOSS = input.match(/\d+/g).map(v => +v)
 const PLAYER = [100, 0, 0]
 
-const weapons = {
-  8: [4, 0],
-  10: [5, 0],
-  25: [6, 0],
-  40: [7, 0],
-  74: [8, 0],
+const weapons = [
+  { cost: 8, damage: 4, armor: 0, name: 'Dagger' },
+  { cost: 10, damage: 5, armor: 0, name: 'Shortsword' },
+  { cost: 25, damage: 6, armor: 0, name: 'Warhammer' },
+  { cost: 40, damage: 7, armor: 0, name: 'Longsword' },
+  { cost: 74, damage: 8, armor: 0, name: 'Greataxe' },
+]
+
+const armor = [
+  { cost: 0, damage: 0, armor: 0, name: 'Nothing' },
+  { cost: 13, damage: 0, armor: 1, name: 'Leather' },
+  { cost: 31, damage: 0, armor: 2, name: 'Chainmail' },
+  { cost: 53, damage: 0, armor: 3, name: 'Splintmail' },
+  { cost: 75, damage: 0, armor: 4, name: 'Bandedmail' },
+  { cost: 102, damage: 0, armor: 5, name: 'Platemail' },
+]
+
+const rings = [
+  { cost: 0, damage: 0, armor: 0, name: 'Damage +0' },
+  { cost: 25, damage: 1, armor: 0, name: 'Damage +1' },
+  { cost: 25, damage: 1, armor: 0, name: 'Damage +1' },
+  { cost: 50, damage: 2, armor: 0, name: 'Damage +2' },
+  { cost: 100, damage: 3, armor: 0, name: 'Damage +3' },
+  { cost: 0, damage: 0, armor: 0, name: 'Defense +0' },
+  { cost: 20, damage: 0, armor: 1, name: 'Defense +1' },
+  { cost: 40, damage: 0, armor: 2, name: 'Defense +2' },
+  { cost: 80, damage: 0, armor: 3, name: 'Defense +3' },
+]
+
+const simulate = player => {
+  const boss = { hp: 109, armor: 2, damage: 8 }
+
+  while (boss.hp > 0 && player.hp > 0) {
+    const playerDamage = Math.max(player.damage - boss.armor, 1)
+    const bossDamage = Math.max(boss.damage - player.armor, 1)
+    if (player.hp > 0) boss.hp = boss.hp - playerDamage
+    if (boss.hp > 0) player.hp = player.hp - bossDamage
+  }
+
+  return player.hp > 0
 }
 
-const armor = {
-  13: [0, 1],
-  31: [0, 2],
-  53: [0, 3],
-  75: [0, 4],
-  102: [0, 5],
+let min = 1000
+let max = 0
+
+for (let weapon of weapons) {
+  for (let mail of armor) {
+    for (let ring1 of rings) {
+      const otherRings = rings.filter(ring => ring.name !== ring1.name)
+      for (let ring2 of otherRings) {
+        const player = {
+          hp: 100,
+          equipment: [weapon, mail, ring1, ring2],
+          get cost() {
+            return this.equipment.reduce((a, b) => a + b.cost, 0)
+          },
+          get armor() {
+            return this.equipment.reduce((a, b) => a + b.armor, 0)
+          },
+          get damage() {
+            return this.equipment.reduce((a, b) => a + b.damage, 0)
+          },
+        }
+
+        if (simulate(player)) {
+          min = Math.min(player.cost, min)
+        } else {
+          max = Math.max(player.cost, max)
+        }
+      }
+    }
+  }
 }
 
-const rings = {
-  25: [1, 0],
-  50: [2, 0],
-  100: [3, 0],
-  20: [0, 1],
-  40: [0, 2],
-  80: [0, 3],
-}
-
-const solve1 = input => {
-  var store = require('./store')
-  var boss = input.join``.match(/\d+/g)
-
-  return require('lodash')
-    .flattenDeep(
-      store.weapons.map(w =>
-        store.armor.map(a =>
-          store.rings.map(r1 =>
-            store.rings.map(r2 => ({
-              cost: w.cost + a.cost + r1.cost + r2.cost,
-              dmg: w.dmg + r1.dmg + r2.dmg,
-              ar: a.ar + r1.ar + r2.ar,
-            }))
-          )
-        )
-      )
-    )
-    .filter(
-      a =>
-        (100 / Math.max(1, boss[1] - a.ar)) >> 0 >=
-        (boss[0] / Math.max(1, a.dmg - boss[2])) >> 0
-    )
-    .reduce((r, v) => (v.cost < r ? v.cost : r), 999)
-}
-
-const solve2 = input => {
-  var store = require('./store')
-  var boss = input.join``.match(/\d+/g)
-
-  return require('lodash')
-    .flattenDeep(
-      store.weapons.map(w =>
-        store.armor.map(a =>
-          store.rings.map(r1 => store.rings.map(r2 => ({ w, a, r1, r2 })))
-        )
-      )
-    )
-    .filter(s => s.r1.id !== s.r2.id)
-    .map(s => ({
-      cost: s.w.cost + s.a.cost + s.r1.cost + s.r2.cost,
-      dmg: s.w.dmg + s.r1.dmg + s.r2.dmg,
-      ar: s.a.ar + s.r1.ar + s.r2.ar,
-    }))
-    .filter(
-      a =>
-        (100 / Math.max(1, boss[1] - a.ar)) >> 0 <
-        (boss[0] / Math.max(1, a.dmg - boss[2])) >> 0
-    )
-    .reduce((r, v) => (v.cost > r ? v.cost : r), 0)
-}
+console.log(min, max)

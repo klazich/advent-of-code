@@ -1,4 +1,4 @@
-import { readFileSync } from 'fs'
+import { writeFileSync } from 'fs'
 
 const INPUT = 'amgozmfv'
 
@@ -77,67 +77,37 @@ const hashRow = r =>
     arr => arr.map(v => +v)
   )
 
-const GRID = Array.from({ length: 128 }, (_, i) => hashRow(i)())
+export const GRID = Array.from({ length: 128 }, (_, i) => hashRow(i)())
 
 // console.log(GRID.flat().filter(v => v !== 0).length)
 
 // Part Two
 
-const adjacency = n => ([x, y]) =>
-  [[x, y + 1], [x, y - 1], [x + 1, y], [x - 1, y]].filter(
-    ([x, y]) => x >= 0 && x < n && y >= 0 && y < n
-  )
+let c = 1
 
-const adjacency128 = adjacency(128)
+const MAP = GRID.reduce(
+  (m, arr, y) =>
+    arr.reduce((mm, v, x) => (v === 1 ? { ...mm, [`${y} ${x}`]: c++ } : mm), m),
+  {}
+)
 
-const buildAdjacencyList = grid => {
-  let list = []
-  for (let y in grid) {
-    for (let x in grid[y]) {
-      const v = grid[y][x]
-      if (v === 0) continue
+const S = (...c) => c.join(' ')
 
-      const adjacent = adjacency128([+x, +y])
-      const adjacentOn = adjacent.filter(([j, i]) => grid[i][j] === 1)
-
-      list = [
-        ...list,
-        [`${x} ${y}`, ...adjacentOn.map(([a, b]) => `${a} ${b}`)],
-      ]
-    }
-  }
-  return list
+const adjacent = str => {
+  const [y, x] = str.split(' ').map(v => +v)
+  return [S(y + 1, x), S(y - 1, x), S(y, x + 1), S(y, x - 1)]
 }
 
-const unique = adjacents => [...new Set(adjacents.flat())]
+const minAdjs = map => str => {
+  const val = k => map[k] || Infinity
+  const adjs = adjacent(str)
+  return Math.min(...[val(str), ...adjs.map(s => val(s))])
+}
 
-const ADJS = buildAdjacencyList(GRID)
-const ON_COS = unique(ADJS)
-
-let cur = ADJS
-let pre
-
-do {
-  let seen = new Set()
-  let groups = []
-
-  for (let co of ON_COS) {
-    if (seen.has(co)) continue
-
-    let group = new Set([co])
-
-    for (let adj of cur) {
-      if (adj.some(v => group.has(v))) {
-        adj.forEach(v => group.add(v))
-      }
-    }
-
-    groups = [...groups, [...group]]
-    seen = new Set(groups.flat())
+const exec = map => {
+  let next = {}
+  for (let str of Object.keys(map)) {
+    next[str] = minAdjs(map)(str)
   }
-
-  pre = cur
-  cur = groups
-} while (cur.length !== pre.length)
-
-console.log(cur, cur.length)
+  return next
+}
